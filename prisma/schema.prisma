@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id String @default(uuid()) @id
+  username String @unique
+  password String
+  statut Boolean? @default(false)
+  role Role @default(USER)
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  userUpdate String
+  userCreate String
+}
+
+model Patient {
+  id    String     @default(uuid()) @id
+  email String  @unique
+  nom  String
+  prenom  String
+  birthday  String
+  adress  String
+  contact String
+  statut Boolean @default(false)
+  consultation Consultation[]
+  rendezvous RendezVous[]
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  userUpdate String
+  userCreate String
+}
+
+model Consultation {
+  id        String      @default(uuid()) @id
+  ref_dossier String @unique
+  date_consult String
+  motif     String
+  histo String
+  clinique String
+  paraclinique String
+  conduite String
+  diagnostic String
+  prescripteur String
+  ref_patient    Patient?    @relation(fields: [patientId], references: [id])
+  patientId  String?
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  userUpdate String
+  userCreate String
+  controle Controle []
+}
+
+model Controle {
+  id        String      @default(uuid()) @id
+  ref_consultation    Consultation?    @relation(fields: [id_consultation], references: [id])
+  id_consultation String
+  date_controle String
+  motif_controle String
+  conduite String
+  diagnostic String
+  prescripteur String
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  userUpdate String
+  userCreate String
+}
+
+model RendezVous {
+  id        String      @default(uuid()) @id
+  date String
+  heure_debut String
+  type String
+  docteur String
+  lien String?
+  description String
+  patient Patient? @relation(fields: [id_patient], references: [id])
+  id_patient  String
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  userUpdate String
+  userCreate String
+}
+
+model Fichiers {
+  id        String      @default(uuid()) @id
+  id_patient  String
+  description String
+  base64File Bytes
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  userUpdate String
+  userCreate String
+
+}
+
+enum Categorie {
+  MEDICALE
+  PATIENT
+}
+
+enum Role {
+  USER
+  ADMIN
+}
