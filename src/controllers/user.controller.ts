@@ -1,94 +1,38 @@
-import { Controller, Get, Post, Body, Put, Delete, Param } from '@nestjs/common';
-import { User as UserModel } from '@prisma/client';
-import { UserService } from 'src/services/user.service';
-import * as bcrypt from 'bcrypt';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { CreateUsersDto } from '../configurations/dto/users/create-users.dto';
+import { UpdateUsersDto } from '../configurations/dto/users/update-users.dto';
+import { AuthService } from '../services/auth.service';
+import { UsersService } from '../services/user.service';
 
-@Controller()
+@Controller('users')
 export class UserController {
-    constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UsersService, private readonly authService: AuthService) {}
 
-    @Get('users')
-    async getUsers(): Promise<UserModel[]> {
-        return this.userService.users({})
-    }
+  @Post('add')
+  create(@Body() user: CreateUsersDto) {
+    return this.authService.create(user);
+  }
 
-    @Post('user')
-    async signupUser(
-        @Body() userData: { username: string, password: string, userUpdate: 'ADMIN', userCreate: 'ADMIN' },
-    ): Promise<UserModel> {
-        userData.password = await bcrypt.hash(userData.password, 10);
-        return this.userService.createUser(userData);
-    }
+  @Get('all')  
+  findAll() {
+    return this.userService.findAll();
+  }
 
-    @Get('login/:username/:password')
-    async loginUser(@Param('username') username: string, @Param('password') password): Promise<UserModel> {
-        let data = this.userService.user({
-            username: username
-        })
-        
-        let isConnected;
-        let isActive;
-        let connection;
+ @Post('login')
+  findOne(@Body('email') email: string, @Body('password') password: string) { 
+    return this.authService.login({
+      'email': email,
+      'password': password
+    });
+  } 
 
-        try {
-            isConnected = await bcrypt.compare(password, (await data).password);
-            isActive = (await data).statut;
-            console.log(isConnected)
-            if(isConnected == true && isActive == true) {
-                connection = {
-                    user: (await data).username,
-                    message: 'Connecté',
-                    token: process.env.ACCESS_TOKEN,
-                    data
-                }
-            }else{
-                if(isActive == false) {
-                    connection = {
-                        user: '#',
-                        message: 'Compte Désactivé',
-                        token: '#'
-                    }
-                }
-                if(isConnected == false) {
-                    connection = {
-                        user: '#',
-                        message: 'Erreur mot de passe',
-                        token: '#'
-                    }
-                }
-            }
-        } catch (error) {
-            data = null
-        }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() user: UpdateUsersDto) {
+    return this.userService.updateOne(user, id);
+  }
 
-        return connection
-    }
-
-    @Put('user/:id')
-    async updateUser(@Param('id') id: string, @Body() data: any): Promise<UserModel> {
-        return this.userService.updateUser({
-            where: { id: id },
-            data: data
-        })
-    }
-
-    @Get('filtered-users/:searchString')
-    async getFilteredUsers(@Param('searchString') searchString: string): Promise<UserModel[]> {
-        return this.userService.users({
-            where: {
-                OR: [
-                    {
-                        username: { contains: searchString }
-                    }
-                ]
-            }
-        })
-    }
-
-    @Delete('user/:id')
-    async deleteUser(@Param('id') id: string): Promise<UserModel> {
-        return this.userService.deleteUser({ id: id });
-    }
-
-
+  @Patch('email/:email')
+  updateByEmail(@Param('email') email: string, @Body() user: UpdateUsersDto) {
+    return this.userService.updateByEmail(user, email);
+  }
 }

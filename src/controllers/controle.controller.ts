@@ -1,9 +1,10 @@
 import { Controller, Get, Post, Body, Put, Delete, Param } from '@nestjs/common';
-import { Controle } from '@prisma/client';
 import { ControleService } from 'src/services/controle.service';
 
 @Controller()
 export class ControleController {
+
+  /*
   constructor(private readonly controleService: ControleService) {}
 
   @Get('controle')
@@ -55,12 +56,12 @@ export class ControleController {
         ]
       }
     })
-  }*/
+  }
 
   @Delete('controle/:id')
   async deleteRdv(@Param('id') id: string): Promise<Controle> {
     return this.controleService.deleteControle({ id: id });
   }
-
+*/
 
 }

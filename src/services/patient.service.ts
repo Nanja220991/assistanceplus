@@ -1,60 +1,74 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
-import  { Patient, Prisma } from '@prisma/client';
-import { throwError } from 'rxjs';
+import { Injectable, Inject } from '@nestjs/common';
+import { PatientEntity } from '../configurations/entities/patient.entity';
+import { UpdatePatientsDto } from 'src/configurations/dto/patients/update-patients.dto';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class PatientService {
+  constructor(
+    @Inject('PATIENT_REPOSITORY')
+    private patientsRepository: typeof PatientEntity
+  ) { }
 
-    constructor(private prisma: PrismaService) {}
+  async create(patient: any): Promise<PatientEntity> {
+    return this.patientsRepository.create<PatientEntity>(patient)
+  }
 
-    async patients(params: {
-        skip?: number;
-        take?: number;
-        cursor?: Prisma.PatientWhereUniqueInput;
-        where?: Prisma.PatientWhereInput;
-        orderBy?: Prisma.PatientOrderByWithRelationInput;
-    }): Promise<Patient[]> {
-        const { skip, take, cursor, where, orderBy } = params;
-        console.log(params);
-        return this.prisma.patient.findMany({
-            skip,
-            take,
-            cursor,
-            where,
-            orderBy,
-        });
-    }
+  async findAll(): Promise<PatientEntity[]> {
+    return this.patientsRepository.findAll<PatientEntity>();
+  }
 
-    async createPatient(data: Prisma.PatientCreateInput): Promise<Patient> {
-       const result = this.patients({
-            where: {
-                email: data.email
+  async search(value: string): Promise<PatientEntity[]> {
+    return this.patientsRepository.findAll<PatientEntity>({
+      where: {
+        [Op.or]: [
+          {
+            nom: {
+              [Op.like]: `%${value}%`
             }
-        })
-        if (!result) {
-            return this.prisma.patient.create({
-                data,
-            })
+          },
+          {
+            prenom: {
+              [Op.like]: `%${value}%`
+            }
+          },
+          {
+            contact: {
+              [Op.like]: `%${value}%`
+            }
+          },
+          {
+            adress: {
+              [Op.like]: `%${value}%`
+            }
+          },
+        ],
+
+      }
+    });
+  }
+
+  async findOne(id: string): Promise<PatientEntity> {
+    return await this.patientsRepository.findOne<PatientEntity>({ where: { id } });
+  }
+
+  async updateOne(patient: UpdatePatientsDto, id: string) {
+    return this.patientsRepository.update(
+      patient,
+      {
+        where: {
+          id: id
         }
-            
-       
-    }
+      })
+  }
 
-    async updatePatient(params: {
-        where: Prisma.PatientWhereUniqueInput;
-        data: Prisma.PatientUpdateInput;
-    }): Promise<Patient> {
-        const { where, data } = params;
-        return this.prisma.patient.update({
-            data,
-            where,
-        });
-    }
-
-    async deletePatient(where: Prisma.PatientWhereUniqueInput): Promise<Patient> {
-        return this.prisma.patient.delete({
-            where,
-        });
-    }
+  async updateByEmail(patient: UpdatePatientsDto, email: string) {
+    return this.patientsRepository.update(
+      patient,
+      {
+        where: {
+          email: email
+        }
+      })
+  }
 }

@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
-import  { Prisma, RendezVous } from '@prisma/client';
 
 @Injectable()
 export class RdvService {
-
+/*
     constructor(private prisma: PrismaService) {}
 
     async rdv(params: {
@@ -45,5 +43,5 @@ export class RdvService {
         return this.prisma.rendezVous.delete({
             where,
         });
-    }
+    }*/
 }

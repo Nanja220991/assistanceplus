@@ -1,71 +1,39 @@
-import { Controller, Get, Post, Body, Put, Delete, Param } from '@nestjs/common';
-import { Patient as PatientModel } from '@prisma/client';
-import { PatientService } from 'src/services/patient.service';
+import { Controller, Get, Post, Body, Put, Delete, Param, Patch } from '@nestjs/common';
+import { CreatePatientsDto } from '../configurations/dto/patients/create-patients.dto';
+import { PatientService } from '../services/patient.service';
+import { UpdatePatientsDto } from '../configurations/dto/patients/update-patients.dto';
 
-@Controller()
+@Controller('patients')
 export class PatientController {
-  constructor(private readonly patientService: PatientService) {}
+  constructor(private readonly patientService: PatientService) { }
 
-  @Get('patients')
-  async getPatients(): Promise<PatientModel[]> {
-    return this.patientService.patients({})
+  @Post('add')
+  create(@Body() user: CreatePatientsDto) {
+    return this.patientService.create(user);
   }
 
-  @Get('patient/:id')
-  async getPatientById(@Param('id') id: string): Promise<PatientModel[]> {
-    const data = this.patientService.patients({
-      where: {
-        id,
-      }
-    })
-    return data;
+  @Get('all')
+  findAll() {
+    return this.patientService.findAll();
   }
 
-  @Post('patient')
-  async createPatient(
-    @Body() patientData: { email: string, nom: string, prenom: string, birthday: string, adress: string, contact: string, statut: boolean, userUpdate: string, userCreate: string },
-  ): Promise<PatientModel> {
-    return this.patientService.createPatient(patientData);
+  @Get('get')
+  findOne(@Body('id') id: string) {
+    return this.patientService.findOne(id);
   }
 
-  @Put('updatePatient/:id')
-  async publishPost(@Param('id') id: string, @Body() data: any): Promise<PatientModel> {
-    console.log(data)
-    return this.patientService.updatePatient({
-      where: { id: id },
-      data: data,
-    });
+  @Get('search/:value')
+  search(@Param('value') value: string) {
+    return this.patientService.search(value);
   }
 
-  @Get('filtered-patient/:searchString')
-  async getFilteredPatients(@Param('searchString') searchString: string): Promise<PatientModel[]> {
-    return this.patientService.patients({
-      where: {
-        OR: [
-          {
-            nom: { contains: searchString }
-          },
-          {
-            prenom: { contains: searchString }
-          },
-          {
-            email: { contains: searchString }
-          },
-          {
-            adress: { contains: searchString }
-          },
-          {
-            contact: { contains: searchString }
-          }
-        ]
-      }
-    })
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() user: UpdatePatientsDto) {
+    return this.patientService.updateOne(user, id);
   }
 
-  @Delete('user/:id')
-  async deletePatient(@Param('id') id: string): Promise<PatientModel> {
-    return this.patientService.deletePatient({ id: id });
+  @Patch('email/:email')
+  updateByEmail(@Param('email') email: string, @Body() user: UpdatePatientsDto) {
+    return this.patientService.updateByEmail(user, email);
   }
-
-
 }

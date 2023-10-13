@@ -1,76 +1,37 @@
-import { Controller, Get, Post, Body, Put, Delete, Param } from '@nestjs/common';
-import { Consultation as ConsultationModel } from '@prisma/client';
-import { ConsultationService } from 'src/services/consultation.service';
+import { Controller, Get, Post, Body, Put, Delete, Param, Patch } from '@nestjs/common';
+import { CreateConsultationsDto } from '../configurations/dto/consultation/create-consultation.dto';
+import { UpdateConsultationsDto } from '../configurations/dto/consultation/update-consultations.dto';
+import { ConsultationService } from '../services/consultation.service';
 
-@Controller()
+@Controller('consultations')
 export class ConsultationController {
-  constructor(private readonly consultationService: ConsultationService) {}
+  constructor(private readonly consultationService: ConsultationService) { }
 
-  @Get('consultations')
-  async getConsultations(): Promise<ConsultationModel[]> {
-    const data = this.consultationService.consultations({});
-    return data;
+  @Post('add')
+  create(@Body() consultation: CreateConsultationsDto) {
+    return this.consultationService.create(consultation);
   }
 
-  @Get('consultation/:id')
-  async getPatientById(@Param('id') id: string): Promise<ConsultationModel[]> {
-    const data = this.consultationService.consultations({
-      where: {
-        id,
-      }
-    })
-    return data;
+  @Get('all')
+  findAll() {
+    return this.consultationService.findAll();
   }
 
-  @Get('consultations/:patientId')
-  async getPatientByIdPatient(@Param('patientId') patientId: string): Promise<ConsultationModel[]> {
-    const data = this.consultationService.consultations({
-      where: {
-        patientId,
-      }
-    })
-    return data;
+  @Get(':id_patient')
+  findByUser(@Param('id_patient') id_patient: string) {
+    console.log(id_patient)
+    return this.consultationService.findByuser(id_patient);
   }
 
-  @Post('consultation')
-  async createConsultation(
-    @Body() consultationsData: { ref_dossier: string, date_consult: string, motif: string, histo: string, patientId: string, 
-      clinique: string, paraclinique: string, conduite: string, diagnostic: string, prescripteur: string, userUpdate: string, userCreate: string },
-  ): Promise<ConsultationModel> {
-    return this.consultationService.createConsultation(consultationsData);
+  @Get('get')
+  findOne(@Body('id') id: string) {
+    return this.consultationService.findOne(id);
   }
 
-  @Put('updateConsultation/:id')
-  async updateConsultation(@Param('id') id: string, @Body() data: any): Promise<ConsultationModel> {
-    return this.consultationService.updateConsultation({
-      where: { id: id },
-      data: data,
-    });
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() consultation: UpdateConsultationsDto) {
+    return this.consultationService.updateOne(consultation, id);
   }
-
-  @Get('filtered-consultation/:searchString')
-  async getFilteredConsultations(@Param('searchString') searchString: string): Promise<ConsultationModel[]> {
-    return this.consultationService.consultations({
-      where: {
-        OR: [
-          {
-            ref_dossier: { contains: searchString }
-          },
-          {
-            motif: { contains: searchString }
-          },
-          {
-            paraclinique: { contains: searchString }
-          }
-        ]
-      }
-    })
-  }
-
-  @Delete('user/:id')
-  async deletePatient(@Param('id') id: string): Promise<ConsultationModel> {
-    return this.consultationService.deleteConsultation({ id: id });
-  }
-
+  
 
 }

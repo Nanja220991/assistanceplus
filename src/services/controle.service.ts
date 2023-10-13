@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
-import  { Controle, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ControleService {
-
+/*
     constructor(private prisma: PrismaService) {}
 
     async controle(params: {
@@ -45,5 +43,5 @@ export class ControleService {
         return this.prisma.controle.delete({
             where,
         });
-    }
+    }*/
 }

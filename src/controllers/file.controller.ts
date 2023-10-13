@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Body, Put, Delete, Param, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { Fichiers } from '@prisma/client';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { FileService } from 'src/services/file.service';

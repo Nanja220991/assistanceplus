@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Put, Delete, Param } from '@nestjs/common';
-import { Patient as PatientModel, RendezVous } from '@prisma/client';
 import { RdvService } from 'src/services/rdv.service';
 
 @Controller()
 export class RdvController {
+/*
   constructor(private readonly rdvService: RdvService) {}
 
   @Get('rdv')
@@ -55,12 +55,12 @@ export class RdvController {
         ]
       }
     })
-  }*/
+  }
 
   @Delete('rdv/:id')
   async deleteRdv(@Param('id') id: string): Promise<RendezVous> {
     return this.rdvService.deleteRdv({ id: id });
   }
-
+*/
 
 }
